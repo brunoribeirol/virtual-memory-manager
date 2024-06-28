@@ -1,17 +1,36 @@
+/*
+    Project: Virtual Memory Management
+    Description: Handles the simulation of virtual memory operations, including allocation,
+                 deallocation, and management of memory swaps.
+
+    File: vm.c
+    Author: Bruno Ribeiro
+    Contact: Bruno Ribeiro <brlla@cesar.school>
+    Organization: CESAR School
+
+    Creation Date: 05/16/2023
+    Last Updated: 05/30/2023
+    License: MIT License
+
+    Notes: This module is part of a larger system intended to demonstrate advanced
+           concepts in operating system design.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
-#define PAGE_TABLE_SIZE 256 
-#define PAGE_SIZE 256       
+#define PAGE_TABLE_SIZE 256 // Number of entries in the page table (0-128) -> 128 pages in the virtual logicalAddress space
+#define PAGE_SIZE 256       // Page size (256 bytes or 256 instructions) -> Size of each page
 
-#define FRAME_SIZE 256                                                 
-#define NUM_FRAMES_PHYSICAL_MEMORY 128                                 
-#define PHYSICAL_MEMORY_SIZE (NUM_FRAMES_PHYSICAL_MEMORY * FRAME_SIZE) 
+#define FRAME_SIZE 256                                                 // Frame size (256 bytes) -> Size of each frame in physical memory
+#define NUM_FRAMES_PHYSICAL_MEMORY 128                                 // Number of frames in physical memory
+#define PHYSICAL_MEMORY_SIZE (NUM_FRAMES_PHYSICAL_MEMORY * FRAME_SIZE) // Physical memory size = 128 frames of 256 bytes each (128 * 256 = 32,768 bytes)
 
-#define TLB_SIZE 16 
+#define TLB_SIZE 16 // Number of entries in the TLB
 
+// Data Structures
 typedef struct TLBEntry
 {
     int pageNumber;
@@ -25,20 +44,22 @@ typedef struct PageTableEntry
     long long accessTime;
 } PageTableEntry;
 
-TLBEntry TLB[TLB_SIZE];                                            
-PageTableEntry pageTable[PAGE_TABLE_SIZE];                         
-signed char physicalMemory[NUM_FRAMES_PHYSICAL_MEMORY][FRAME_SIZE]; 
-signed char values[PAGE_SIZE];                                     
+// Global Variables
+TLBEntry TLB[TLB_SIZE];                                             // 16 (0-15); 2 = [0] -> Page number, [1] -> Frame number
+PageTableEntry pageTable[PAGE_TABLE_SIZE];                          // 128 frames (0-127) -> The size of the page table is the number of available
+signed char physicalMemory[NUM_FRAMES_PHYSICAL_MEMORY][FRAME_SIZE]; // 128 frames x 256-byte frame size
+signed char values[PAGE_SIZE];                                      // Array to store all the values of each pageNumber (256 bytes)
 int translatedAddresses = 0;
 int pageFaults = 0;
 int TLBHits = 0;
-int TLBCounter = 0;   
-int nextTLBEntry = 0; 
-int nextFrame = 0;    
+int TLBCounter = 0;   // Tracks the number of entries currently used in the TLB
+int nextTLBEntry = 0; // Index of the next available entry in the TLB for new page mappings
+int nextFrame = 0;    // Points to the next free frame number in the physical memory  
 
 const char *replacementStrategy;
 FILE *BACKING_STORE;
 
+// Function Declarations
 void initTLB();
 void initPageTable();
 
@@ -146,23 +167,29 @@ void getAddress(int logicalAddress)
     if (TLBFound)
     {
         TLBHits++;
+        // printf("TLB FOUND - Page Number: %d on TLB Entry: %d\n", pageNumber, TLBCounter);
     }
     else if (pageTableFound)
     {
-
+        // Print page table entry found and add to TLB (even if full)
+        // printf("PAGE TABLE FOUND - Page Number: %d on Frame %d\n", pageNumber, frameNumber);
         TLBAdd(pageNumber, frameNumber);
     }
     else
     {
         pageFaults++;
+        // printf("PAGE FAULT - Page Number %d was not found\n", pageNumber);
 
+        // Update page table based on replacement strategy (FIFO or LRU)
         if (strcmp(replacementStrategy, "fifo") == 0)
         {
             updatePageTableFIFO(pageNumber, &frameNumber);
+            // printf("PAGE TABLE updated successfully with Page Number: %d on Frame: %d\n", pageNumber, frameNumber);
         }
         else if (strcmp(replacementStrategy, "lru") == 0)
         {
             updatePageTableLRU(pageNumber, &frameNumber);
+            // printf("PAGE TABLE updated successfully with Page Number: %d on Frame: %d\n", pageNumber, frameNumber);
         }
         TLBAdd(pageNumber, frameNumber);
     }
@@ -172,6 +199,12 @@ void getAddress(int logicalAddress)
     signed char value = readBackingStore(backingStoreAddress);
 
     writeOutputFile("correct.txt", logicalAddress, frameNumber, pageOffset, value, TLBCounter);
+
+    // Output the results to the terminal (if desired)
+    // printf("Frame Number: %d\n", frameNumber);
+    // printf("Page Offset: %d\n", pageOffset);
+    // printf("Logical address: %d TLB: %d Physical address: %d Value: %d\n", logicalAddress, TLBCounter, physicalAddress, value);
+    // printf("\n");
 }
 
 bool searchTLB(int pageNumber, int *frameNumber)
@@ -236,6 +269,9 @@ void TLBAdd(int pageNumber, int frameNumber)
         TLB[nextTLBEntry].frameNumber = frameNumber;
         TLBIndex = nextTLBEntry;
 
+        // Print a message indicating that TLB was full and updated with the new entry
+        // printf("TLB was FULL and updated with Page Number: %d on TLB Entry: %d\n", pageNumber, nextTLBEntry);
+
         nextTLBEntry = (nextTLBEntry + 1) % TLB_SIZE;
 
         TLBCounter = TLBIndex;
@@ -249,6 +285,9 @@ void TLBAdd(int pageNumber, int frameNumber)
                 TLB[i].pageNumber = pageNumber;
                 TLB[i].frameNumber = frameNumber;
                 TLBIndex = i;
+
+                // Print a message indicating that TLB was not full and updated with the new entry
+                // printf("TLB was NOT FULL and updated with Page Number: %d on TLB Entry: %d\n", pageNumber, i);
 
                 TLBCounter = TLBIndex;
                 return;
