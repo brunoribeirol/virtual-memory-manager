@@ -135,3 +135,32 @@ The output for the provided input should be named as `correct.txt` and have the 
     Page Fault Rate = 1.000
     TLB Hits = 0
     TLB Hit Rate = 0.000
+
+### 🧪 Test Instructions
+
+- First, ensure the file has execution permissions. You can do this with the `chmod` command:
+  - `chmod +x test.sh`
+- Then you need to run the `make` command to generate the executable
+- After that, you can run the script with the command: 
+  - `./run.sh all` -> if you want to run all tests
+  - `./run.sh [number_of_test]` - if you want to run a specific test
+    - `./run.sh 5`
+- If there are differences in your result, it will print these errors in the `diff` folder with the name of the file that had the difference. The line starting with < is the received result, and the line starting with > is the expected result.
+- The folder should be organized as follows:
+   ```
+    .
+    ├── Makefile
+    ├── vm.c
+    ├── BACKING_STORE.bin
+    ├── run.sh
+    ├── test
+    │   ├── 1
+    │   │   ├── addresses_1.txt
+    │   │   ├── addresses_1_fifo.txt
+    │   │   ├── addresses_1_lru.txt
+    │   ├── N
+    │   │   ├── addresses_N.txt
+    │   │   ├── addresses_N_fifo.txt
+    │   │   ├── addresses_N_lru.txt
+    ```
+
