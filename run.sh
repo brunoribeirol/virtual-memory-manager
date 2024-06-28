@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Função para executar testes
+# Function to run tests
 run_tests() {
   command=$1
   test_number=$2
   echo "---------------------------------"
-  echo "Executando testes para $command"
+  echo "Running tests for $command"
   echo "---------------------------------"
 
   # Loop through the input files
@@ -13,7 +13,7 @@ run_tests() {
   make clean
   make
 
-  # Definir o intervalo de testes com base no argumento test_number
+  # Define the test range based on the test_number argument
   if [ "$test_number" = "all" ]
   then
     range="{1..6}"
@@ -23,20 +23,20 @@ run_tests() {
 
   for i in $(eval echo $range)
   do
-    # Definir addresses como o caminho para o arquivo de entrada
+    # Define addresses as the path to the input file
     addresses="./test/$i/addresses_$i.txt"
 
     comparefile="./test/${i}/addresses_${i}_${command}.txt"
 
-    # Executar o comando no arquivo de entrada
+    # Run the command on the input file
     ./vm $addresses $command
 
-    # Comparar a saída com o arquivo comparefile
+    # Compare the output with the comparefile
     total_lines=$(wc -l < "$comparefile")
     diff_lines=$(diff -y --suppress-common-lines correct.txt "$comparefile" | wc -l)
     same_lines=$((total_lines - diff_lines))
     
-    # Calcular a porcentagem de similaridade
+    # Calculate the similarity percentage
     if [ $total_lines -gt 0 ]
     then
       similarity=$((100 * same_lines / total_lines))
@@ -46,44 +46,44 @@ run_tests() {
 
     if diff -a correct.txt "$comparefile" > /dev/null
     then
-      echo "Teste $addresses: Passou"
+      echo "Test $addresses: Passed"
       echo "---------------------------------"
     else
-      echo "Teste $addresses: Não passou"
+      echo "Test $addresses: Failed"
       echo
-      # Criar o diretório diffs se ele não existir
+      # Create the diffs directory if it doesn't exist
       mkdir -p diffs
-      # Definir o nome do arquivo diff
+      # Define the diff file name
       diff_file="diffs/diff_${comparefile##*/}"
-      # Escrever as diferenças no arquivo diff
+      # Write the differences to the diff file
       diff -a correct.txt "$comparefile" > "$diff_file"
-      # Informar que as diferenças foram escritas no arquivo diff
-      echo "As diferenças foram escritas em $diff_file"
+      # Inform that the differences were written to the diff file
+      echo "Differences were written to $diff_file"
       echo
-      echo "Similaridade: $similarity%"
+      echo "Similarity: $similarity%"
       echo "---------------------------------"
     fi
   done
 }
 
-# Verificar se um argumento foi fornecido
+# Check if an argument was provided
 if [ $# -eq 0 ]
 then
-  echo "Por favor, forneça um argumento. Use 'all' para executar todos os testes ou um número para executar um teste específico."
+  echo "Please provide an argument. Use 'all' to run all tests or a number to run a specific test."
   exit 1
 fi
 
-# Executar testes para fifo e lru sequencialmente
+# Run tests for fifo and lru sequentially
 run_tests fifo $1
 run_tests lru $1
 
-# Executar make clean ao final do script
+# Run make clean at the end of the script
 make clean
 
-# Mensagem de créditos
+# Credits message
 echo "---------------------------------"
-echo " Créditos para os contribuidores "
-echo " Testes criados e validados por: "
+echo " Credits to the contributors "
+echo " Tests created and validated by: "
 echo "---------------------------------"
 echo "Eurivaldo Filho"
 echo "Claudio Alves"
@@ -92,4 +92,5 @@ echo "Pedro Lira"
 echo "Igor Wanderley"
 echo "Felipe Serpa"
 echo "Gabriel Lima"
+echo "Bruno Ribeiro"
 echo "---------------------------------"
