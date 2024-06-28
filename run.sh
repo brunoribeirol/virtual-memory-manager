@@ -16,7 +16,7 @@ run_tests() {
   # Define the test range based on the test_number argument
   if [ "$test_number" = "all" ]
   then
-    range="{1..6}"
+    range="{1..8}"
   else
     range="$test_number"
   fi
