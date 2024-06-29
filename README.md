@@ -73,15 +73,22 @@ For each translated physical address, the program retrieves and outputs the byte
 ## 🛠️ Build Instructions
 
 1. Ensure you are on a Linux, Unix, or macOS system.
-2. Compile using `make` it will generate the executable `vm`
+2. Generate the executable `vm` by compiling it using:
+    ```bash
+    make
+    ```
    
 ## ⚙️ Execution
 
 Run the compiled executable with the input file:
 - For First-in First-Out Replacement (fifo):
-  - `./vm address.txt fifo`
+  ```bash
+  ./vm addresses.txt fifo
+  ```
 - For Least Recently Used (lru):
-  - `./vm address.txt lru`
+  ```bash
+  ./vm addresses.txt lru
+  ```
 
 ## 📥 Example Input
 
@@ -139,12 +146,23 @@ The output for the provided input should be named as `correct.txt` and have the 
 ### 🧪 Test Instructions
 
 - First, ensure the file has execution permissions. You can do this with the `chmod` command:
-  - `chmod +x test.sh`
-- Then you need to run the `make` command to generate the executable
-- After that, you can run the script with the command: 
-  - `./run.sh all` -> if you want to run all tests
-  - `./run.sh [number_of_test]` - if you want to run a specific test
-    - `./run.sh 5`
+   ```bash
+   chmod +x test.sh
+   ```
+- Then you need to generate the executable by running the command:
+  ```bash
+  make
+  ```
+- After that, you can run the script with the command:
+  - If you want to run all tests:
+     ```bash
+     ./run.sh all
+     ```
+  - If you want to run a specific test:
+    - `./run.sh [number_of_test]`
+        ```bash
+         ./run.sh 5
+         ```
 - If there are differences in your result, it will print these errors in the `diff` folder with the name of the file that had the difference. The line starting with < is the received result, and the line starting with > is the expected result.
 - The folder should be organized as follows:
    ```
